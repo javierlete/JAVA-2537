@@ -7,4 +7,5 @@
   
 ## Ejercicios
 
-* https://puntocomnoesunlenguaje.blogspot.com/p/ejercicios.html
+* Ejercicios de programación estructurada: https://puntocomnoesunlenguaje.blogspot.com/p/ejercicios.html
+* Ejercicios de programación orientada a objetos: https://puntocomnoesunlenguaje.blogspot.com/p/blog-page.html
