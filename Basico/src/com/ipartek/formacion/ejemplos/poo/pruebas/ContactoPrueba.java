@@ -8,7 +8,7 @@ import com.ipartek.formacion.ejemplos.poo.Contacto;
 public class ContactoPrueba {
 
 	public static void main(String[] args) {
-		Contacto contacto;
+		Contacto contacto; // vale null por defecto
 
 		contacto = new Contacto();
 
@@ -67,6 +67,13 @@ public class ContactoPrueba {
 		contactos.add(contacto5);
 		
 		for(Contacto c: contactos) {
+			System.out.println(c.getNombreCompleto());
+			System.out.println(c);
+		}
+		
+		for(int i = 0; i < contactos.size();  i++) {
+			Contacto c = contactos.get(i);
+			
 			System.out.println(c.getNombreCompleto());
 			System.out.println(c);
 		}
