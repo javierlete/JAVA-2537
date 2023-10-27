@@ -2,6 +2,9 @@ package com.ipartek.formacion.ejemplos.aplicacion;
 
 import java.util.Scanner;
 
+import com.ipartek.formacion.ejemplos.poo.Contacto;
+import com.ipartek.formacion.ejemplos.poo.Oficina;
+
 public class MantenimientoOficina {
 
 	private static final int LISTADO = 1;
@@ -9,9 +12,19 @@ public class MantenimientoOficina {
 	private static final int INSERTAR = 3;
 	private static final int MODIFICAR = 4;
 	private static final int BORRAR = 5;
+	
 	private static final int SALIR = 0;
 
 	private static final Scanner SC = new Scanner(System.in);
+	
+	private static final Oficina OFICINA = new Oficina(null, "Bilbao", new Contacto("Javier"));
+	
+	static {
+		OFICINA.contratar(new Contacto("Uno"));
+		OFICINA.contratar(new Contacto("Dos"));
+		OFICINA.contratar(new Contacto("Tres"));
+		OFICINA.contratar(new Contacto("Cuatro"));
+	}
 
 	public static void main(String[] args) {
 		int opcion;
@@ -72,12 +85,15 @@ public class MantenimientoOficina {
 	private static void listado() {
 		System.out.println("LISTADO DE CONTACTOS");
 
-		// TODO Completar el listado de oficinas
+		for(Contacto c: OFICINA.getEmpleados()) {
+			// TODO Mejorar formato de visualización
+			System.out.println(c);
+		}
 	}
 
 	private static void buscar() {
 		System.out.println("BUSCAR POR ID");
-
+	
 		// TODO Completar el buscar por id
 	}
 
