@@ -61,6 +61,16 @@ public class Oficina {
 		return "Oficina [id=" + id + ", nombre=" + nombre + ", director=" + director + ", empleados=" + empleados + "]";
 	}
 	
+	public Contacto buscarEmpleadoPorId(Long id) {
+		for(Contacto e: empleados) {
+			if(e.getId() == id) {
+				return e;
+			}
+		}
+		
+		return null;
+	}
+
 	public Contacto contratar(Contacto empleado) {
 		Long id = 0L;
 		
@@ -80,13 +90,6 @@ public class Oficina {
 	}
 	
 	public void despedir(Long id) {
-		for(int i = 0; i < empleados.size(); i++) {
-			Contacto empleado = empleados.get(i);
-			
-			if(empleado.getId() == id) {
-				empleados.remove(i);
-				return;
-			}
-		}
+		empleados.remove(buscarEmpleadoPorId(id));
 	}
 }

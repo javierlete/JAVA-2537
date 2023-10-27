@@ -94,7 +94,14 @@ public class MantenimientoOficina {
 	private static void buscar() {
 		System.out.println("BUSCAR POR ID");
 	
-		// TODO Completar el buscar por id
+		System.out.print("ID: ");
+		Long id = SC.nextLong();
+		
+		Contacto contacto = OFICINA.buscarEmpleadoPorId(id);
+		
+		System.out.println(contacto);
+		
+		// TODO Mejorar la visualización del contacto en formato ficha
 	}
 
 	private static void insertar() {
