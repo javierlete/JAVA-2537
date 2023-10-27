@@ -1,5 +1,6 @@
 package com.ipartek.formacion.ejemplos.aplicacion;
 
+import java.time.LocalDate;
 import java.util.Scanner;
 
 import com.ipartek.formacion.ejemplos.poo.Contacto;
@@ -112,16 +113,36 @@ public class MantenimientoOficina {
 		
 		Contacto contacto = new Contacto();
 		
-		System.out.print("Nombre: ");
-		contacto.setNombre(SC.nextLine());
+		pedirDatosContacto(contacto);
 		
 		OFICINA.contratar(contacto);
+		
+		listado();
 	}
 
 	private static void modificar() {
 		System.out.println("MODIFICAR");
 		
-		// TODO Completar el modificar
+		System.out.print("ID: ");
+		Long id = SC.nextLong();
+		SC.nextLine();
+		
+		Contacto contacto = OFICINA.buscarEmpleadoPorId(id);
+		
+		pedirDatosContacto(contacto);
+		
+		listado();
+	}
+
+	private static void pedirDatosContacto(Contacto contacto) {
+		System.out.print("Nombre: ");
+		contacto.setNombre(SC.nextLine());
+		
+		System.out.print("Apellidos: ");
+		contacto.setApellidos(SC.nextLine());
+		
+		System.out.print("Fecha de nacimiento (AAAA-MM-DD): ");
+		contacto.setFechaNacimiento(LocalDate.parse(SC.nextLine()));
 	}
 
 	private static void borrar() {
