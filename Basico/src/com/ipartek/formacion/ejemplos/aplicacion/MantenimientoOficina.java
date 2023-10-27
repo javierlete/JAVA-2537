@@ -54,7 +54,10 @@ public class MantenimientoOficina {
 
 	private static int recibirOpcion() {
 		System.out.print("Dime la opción que deseas: ");
-		return SC.nextInt();
+		int opcion = SC.nextInt();
+		SC.nextLine();
+		
+		return opcion;
 	}
 
 	private static void ejecutarOpcion(int opcion) {
@@ -107,7 +110,12 @@ public class MantenimientoOficina {
 	private static void insertar() {
 		System.out.println("INSERTAR");
 		
-		// TODO Completar el insertar
+		Contacto contacto = new Contacto();
+		
+		System.out.print("Nombre: ");
+		contacto.setNombre(SC.nextLine());
+		
+		OFICINA.contratar(contacto);
 	}
 
 	private static void modificar() {
