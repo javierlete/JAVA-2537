@@ -148,7 +148,12 @@ public class MantenimientoOficina {
 	private static void borrar() {
 		System.out.println("BORRAR");
 		
-		// TODO Completar el borrar
+		System.out.print("ID: ");
+		Long id = SC.nextLong();
+		
+		OFICINA.despedir(id);
+		
+		listado();
 	}
 
 	private static void salir() {
