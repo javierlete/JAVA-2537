@@ -1,10 +1,11 @@
 package com.ipartek.formacion.ejemplos.aplicacion;
 
 import java.time.LocalDate;
-import java.util.Scanner;
 
 import com.ipartek.formacion.ejemplos.poo.Contacto;
 import com.ipartek.formacion.ejemplos.poo.Oficina;
+
+import static com.ipartek.formacion.ejemplos.bibliotecas.Consola.*;
 
 public class MantenimientoOficina {
 
@@ -16,8 +17,6 @@ public class MantenimientoOficina {
 	
 	private static final int SALIR = 0;
 
-	private static final Scanner SC = new Scanner(System.in);
-	
 	private static final Oficina OFICINA = new Oficina(null, "Bilbao", new Contacto("Javier"));
 	
 	static {
@@ -39,7 +38,7 @@ public class MantenimientoOficina {
 	}
 
 	private static void mostrarMenu() {
-		System.out.println("""
+		pl("""
 				MENU
 				====
 
@@ -54,11 +53,7 @@ public class MantenimientoOficina {
 	}
 
 	private static int recibirOpcion() {
-		System.out.print("Dime la opción que deseas: ");
-		int opcion = SC.nextInt();
-		SC.nextLine();
-		
-		return opcion;
+		return rInt("Dime la opción que deseas");
 	}
 
 	private static void ejecutarOpcion(int opcion) {
@@ -87,29 +82,28 @@ public class MantenimientoOficina {
 	}
 
 	private static void listado() {
-		System.out.println("LISTADO DE CONTACTOS");
+		pl("LISTADO DE CONTACTOS");
 
 		for(Contacto c: OFICINA.getEmpleados()) {
 			// TODO Mejorar formato de visualización
-			System.out.println(c);
+			pl(c);
 		}
 	}
 
 	private static void buscar() {
-		System.out.println("BUSCAR POR ID");
+		pl("BUSCAR POR ID");
 	
-		System.out.print("ID: ");
-		Long id = SC.nextLong();
+		Long id = rLong("ID");
 		
 		Contacto contacto = OFICINA.buscarEmpleadoPorId(id);
 		
-		System.out.println(contacto);
+		pl(contacto);
 		
 		// TODO Mejorar la visualización del contacto en formato ficha
 	}
 
 	private static void insertar() {
-		System.out.println("INSERTAR");
+		pl("INSERTAR");
 		
 		Contacto contacto = new Contacto();
 		
@@ -121,11 +115,9 @@ public class MantenimientoOficina {
 	}
 
 	private static void modificar() {
-		System.out.println("MODIFICAR");
+		pl("MODIFICAR");
 		
-		System.out.print("ID: ");
-		Long id = SC.nextLong();
-		SC.nextLine();
+		Long id = rLong("ID");
 		
 		Contacto contacto = OFICINA.buscarEmpleadoPorId(id);
 		
@@ -135,21 +127,19 @@ public class MantenimientoOficina {
 	}
 
 	private static void pedirDatosContacto(Contacto contacto) {
-		System.out.print("Nombre: ");
-		contacto.setNombre(SC.nextLine());
+		contacto.setNombre(rString("Nombre"));
+		contacto.setApellidos(rString("Apellidos"));
 		
-		System.out.print("Apellidos: ");
-		contacto.setApellidos(SC.nextLine());
+		String sFecha = rString("Fecha de nacimiento (AAAA-MM-DD)");
+		LocalDate fechaNacimiento = LocalDate.parse(sFecha);
 		
-		System.out.print("Fecha de nacimiento (AAAA-MM-DD): ");
-		contacto.setFechaNacimiento(LocalDate.parse(SC.nextLine()));
+		contacto.setFechaNacimiento(fechaNacimiento);
 	}
 
 	private static void borrar() {
-		System.out.println("BORRAR");
+		pl("BORRAR");
 		
-		System.out.print("ID: ");
-		Long id = SC.nextLong();
+		Long id = rLong("ID");
 		
 		OFICINA.despedir(id);
 		
@@ -157,10 +147,10 @@ public class MantenimientoOficina {
 	}
 
 	private static void salir() {
-		System.out.println("SALIENDO");
+		pl("SALIENDO");
 	}
 
 	private static void opcionNoEncontrada() {
-		System.out.println("Opción no encontrada");
+		pl("Opción no encontrada");
 	}
 }
