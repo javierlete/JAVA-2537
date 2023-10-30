@@ -1,9 +1,12 @@
 package com.ipartek.formacion.ejemplos.poo;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class Contacto {
+public class Contacto implements Serializable {
+	private static final long serialVersionUID = -2280086593329524475L;
+
 	// Variables de instancia
 	private Long id;
 	private String nombre;

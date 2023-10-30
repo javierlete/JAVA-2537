@@ -1,9 +1,12 @@
 package com.ipartek.formacion.ejemplos.poo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class Oficina {
+public class Oficina implements Serializable {
+	private static final long serialVersionUID = -825254392410083762L;
+
 	private Long id;
 	private String nombre;
 	private Contacto director;

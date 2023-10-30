@@ -6,9 +6,13 @@ import static com.ipartek.formacion.ejemplos.bibliotecas.Consola.rLocalDate;
 import static com.ipartek.formacion.ejemplos.bibliotecas.Consola.rLong;
 import static com.ipartek.formacion.ejemplos.bibliotecas.Consola.rString;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.Scanner;
@@ -18,7 +22,8 @@ import com.ipartek.formacion.ejemplos.poo.Oficina;
 
 public class MantenimientoOficina {
 
-	private static final String FICHERO_CONTACTOS = "contactos.csv";
+	private static final String FICHERO_CONTACTOS = "contactos.dat";
+	private static final String FICHERO_CONTACTOS_CSV = "contactos.csv";
 	
 	private static final int LISTADO = 1;
 	private static final int BUSCAR = 2;
@@ -27,10 +32,13 @@ public class MantenimientoOficina {
 	private static final int BORRAR = 5;
 	private static final int EXPORTAR = 6;
 	private static final int IMPORTAR = 7;
+	private static final int GUARDAR = 8;
+	private static final int CARGAR = 9;
 
 	private static final int SALIR = 0;
 
-	private static final Oficina OFICINA = new Oficina(null, "Bilbao", new Contacto("Javier"));
+	private static Oficina oficina = new Oficina(null, "Bilbao", new Contacto("Javier"));
+
 
 //	static {
 //		OFICINA.contratar(new Contacto("Uno"));
@@ -42,7 +50,8 @@ public class MantenimientoOficina {
 	public static void main(String[] args) {
 		int opcion;
 
-		importar();
+		cargar();
+//		importar();
 		
 		do {
 			mostrarMenu();
@@ -64,6 +73,8 @@ public class MantenimientoOficina {
 				5. Borrar
 				6. Exportar CSV
 				7. Importar CSV
+				8. Guardar
+				9. Cargar
 
 				0. Salir
 				""");
@@ -96,6 +107,12 @@ public class MantenimientoOficina {
 		case IMPORTAR:
 			importar();
 			break;
+		case GUARDAR:
+			guardar();
+			break;
+		case CARGAR:
+			cargar();
+			break;
 		case SALIR:
 			salir();
 			break;
@@ -107,7 +124,7 @@ public class MantenimientoOficina {
 	private static void listado() {
 		pl("LISTADO DE CONTACTOS");
 
-		for (Contacto c : OFICINA.getEmpleados()) {
+		for (Contacto c : oficina.getEmpleados()) {
 			// TODO Mejorar formato de visualización
 			pl(c);
 		}
@@ -118,7 +135,7 @@ public class MantenimientoOficina {
 
 		Long id = rLong("ID");
 
-		Contacto contacto = OFICINA.buscarEmpleadoPorId(id);
+		Contacto contacto = oficina.buscarEmpleadoPorId(id);
 
 		if (contacto != null) {
 			pl(contacto);
@@ -136,7 +153,7 @@ public class MantenimientoOficina {
 
 		pedirDatosContacto(contacto);
 
-		OFICINA.contratar(contacto);
+		oficina.contratar(contacto);
 
 		listado();
 	}
@@ -146,7 +163,7 @@ public class MantenimientoOficina {
 
 		Long id = rLong("ID");
 
-		Contacto contacto = OFICINA.buscarEmpleadoPorId(id);
+		Contacto contacto = oficina.buscarEmpleadoPorId(id);
 
 		if (contacto != null) {
 			pedirDatosContacto(contacto);
@@ -197,7 +214,7 @@ public class MantenimientoOficina {
 
 		Long id = rLong("ID");
 
-		OFICINA.despedir(id);
+		oficina.despedir(id);
 
 		listado();
 	}
@@ -205,7 +222,7 @@ public class MantenimientoOficina {
 	private static void exportar() {
 		pl("EXPORTAR");
 
-		try (FileWriter fw = new FileWriter(FICHERO_CONTACTOS);
+		try (FileWriter fw = new FileWriter(FICHERO_CONTACTOS_CSV);
 				PrintWriter pw = new PrintWriter(fw)) {
 			System.out.println("\"ID\";\"Nombre\";\"Apellidos\";\"FechaNacimiento\"");
 			pw.print(
@@ -213,7 +230,7 @@ public class MantenimientoOficina {
 				"ID";"Nombre";"Apellidos";"FechaNacimiento"
 				""");
 			
-			for (Contacto c : OFICINA.getEmpleados()) {
+			for (Contacto c : oficina.getEmpleados()) {
 				System.out.printf("%s;%s;%s;%s\n", c.getId(), c.getNombre(), c.getApellidos(), c.getFechaNacimiento());
 				pw.printf("%s;%s;%s;%s\n", c.getId(), c.getNombre(), c.getApellidos(), c.getFechaNacimiento());
 			}
@@ -227,10 +244,10 @@ public class MantenimientoOficina {
 	private static void importar() {
 		pl("IMPORTAR");
 		
-		try (FileReader fr = new FileReader(FICHERO_CONTACTOS);
+		try (FileReader fr = new FileReader(FICHERO_CONTACTOS_CSV);
 				Scanner sc = new Scanner(fr);) {
 			
-			OFICINA.despedirTodos();
+			oficina.despedirTodos();
 			
 			sc.nextLine();
 			
@@ -247,7 +264,7 @@ public class MantenimientoOficina {
 				
 				Contacto c = new Contacto(id, nombre, apellidos, fechaNacimiento);
 				
-				OFICINA.contratar(c);
+				oficina.contratar(c);
 			}
 		} catch (IOException e) {
 			pl("No se ha podido leer el fichero");
@@ -256,8 +273,33 @@ public class MantenimientoOficina {
 		System.out.println("Fichero importado");
 	}
 
+	private static void guardar() {
+		pl("GUARDAR");
+		
+		try (FileOutputStream fos = new FileOutputStream(FICHERO_CONTACTOS);
+				ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+			oos.writeObject(oficina);
+		} catch (IOException e) {
+			pl("No se ha podido escribir el fichero");
+			e.printStackTrace();
+		}
+	}
+
+	private static void cargar() {
+		pl("CARGAR");
+		
+		try (FileInputStream fis = new FileInputStream(FICHERO_CONTACTOS);
+				ObjectInputStream ois = new ObjectInputStream(fis)) {
+			oficina = (Oficina) ois.readObject();
+		} catch (IOException | ClassNotFoundException e) {
+			pl("No se ha podido leer el fichero");
+		}
+	}
+
 	private static void salir() {
-		exportar();
+//		exportar();
+		guardar();
+
 		pl("SALIENDO");
 	}
 
