@@ -9,31 +9,37 @@ public class Oficina {
 	private Contacto director;
 
 	private ArrayList<Contacto> empleados = new ArrayList<>();
-	
+
 	public Oficina(Long id, String nombre, Contacto director) {
 		setId(id);
 		setNombre(nombre);
 		setDirector(director);
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}
+
 	public String getNombre() {
 		return nombre;
 	}
+
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
+
 	public Contacto getDirector() {
 		return director;
 	}
+
 	public void setDirector(Contacto director) {
 		this.director = director;
 	}
+
 	public ArrayList<Contacto> getEmpleados() {
 		return empleados;
 	}
@@ -60,36 +66,43 @@ public class Oficina {
 	public String toString() {
 		return "Oficina [id=" + id + ", nombre=" + nombre + ", director=" + director + ", empleados=" + empleados + "]";
 	}
-	
+
 	public Contacto buscarEmpleadoPorId(Long id) {
-		for(Contacto e: empleados) {
-			if(e.getId() == id) {
+		for (Contacto e : empleados) {
+			if (e.getId() == id) {
 				return e;
 			}
 		}
-		
+
 		return null;
 	}
 
 	public Contacto contratar(Contacto empleado) {
-		Long id = 0L;
-		
-		for(Contacto e: empleados) {
-			if(e.getId() > id) {
-				id = e.getId();
+		if (empleado.getId() == null) {
+
+			Long id = 0L;
+
+			for (Contacto e : empleados) {
+				if (e.getId() > id) {
+					id = e.getId();
+				}
 			}
+
+			id++;
+
+			empleado.setId(id);
 		}
-		
-		id++;
-		
-		empleado.setId(id);
-		
+
 		empleados.add(empleado);
-		
+
 		return empleado;
 	}
-	
+
 	public void despedir(Long id) {
 		empleados.remove(buscarEmpleadoPorId(id));
+	}
+	
+	public void despedirTodos() {
+		empleados.clear();
 	}
 }
