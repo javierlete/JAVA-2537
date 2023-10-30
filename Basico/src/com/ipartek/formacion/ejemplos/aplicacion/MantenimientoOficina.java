@@ -14,11 +14,11 @@ public class MantenimientoOficina {
 	private static final int INSERTAR = 3;
 	private static final int MODIFICAR = 4;
 	private static final int BORRAR = 5;
-	
+
 	private static final int SALIR = 0;
 
 	private static final Oficina OFICINA = new Oficina(null, "Bilbao", new Contacto("Javier"));
-	
+
 	static {
 		OFICINA.contratar(new Contacto("Uno"));
 		OFICINA.contratar(new Contacto("Dos"));
@@ -84,7 +84,7 @@ public class MantenimientoOficina {
 	private static void listado() {
 		pl("LISTADO DE CONTACTOS");
 
-		for(Contacto c: OFICINA.getEmpleados()) {
+		for (Contacto c : OFICINA.getEmpleados()) {
 			// TODO Mejorar formato de visualización
 			pl(c);
 		}
@@ -92,57 +92,90 @@ public class MantenimientoOficina {
 
 	private static void buscar() {
 		pl("BUSCAR POR ID");
-	
+
 		Long id = rLong("ID");
-		
+
 		Contacto contacto = OFICINA.buscarEmpleadoPorId(id);
-		
-		pl(contacto);
-		
-		// TODO Mejorar la visualización del contacto en formato ficha
+
+		if (contacto != null) {
+			pl(contacto);
+
+			// TODO Mejorar la visualización del contacto en formato ficha
+		} else {
+			pl("No se ha encontrado el contacto");
+		}
 	}
 
 	private static void insertar() {
 		pl("INSERTAR");
-		
+
 		Contacto contacto = new Contacto();
-		
+
 		pedirDatosContacto(contacto);
-		
+
 		OFICINA.contratar(contacto);
-		
+
 		listado();
 	}
 
 	private static void modificar() {
 		pl("MODIFICAR");
-		
+
 		Long id = rLong("ID");
-		
+
 		Contacto contacto = OFICINA.buscarEmpleadoPorId(id);
-		
-		pedirDatosContacto(contacto);
-		
-		listado();
+
+		if (contacto != null) {
+			pedirDatosContacto(contacto);
+
+			listado();
+		} else {
+			pl("No se ha encontrado el contacto");
+		}
 	}
 
 	private static void pedirDatosContacto(Contacto contacto) {
-		contacto.setNombre(rString("Nombre"));
-		contacto.setApellidos(rString("Apellidos"));
-		
-		String sFecha = rString("Fecha de nacimiento (AAAA-MM-DD)");
-		LocalDate fechaNacimiento = LocalDate.parse(sFecha);
-		
-		contacto.setFechaNacimiento(fechaNacimiento);
+		boolean hayError = true;
+
+		do {
+			try {
+				contacto.setNombre(rString("Nombre"));
+				hayError = false;
+			} catch (Exception e) {
+				pl(e.getMessage());
+			}
+		} while (hayError);
+
+		String apellidos = rString("Apellidos");
+
+		if (apellidos.trim().length() == 0) {
+			apellidos = null;
+		}
+
+		contacto.setApellidos(apellidos);
+
+		hayError = true;
+
+		LocalDate fechaNacimiento = null;
+
+		do {
+			try {
+				fechaNacimiento = rLocalDate("Fecha de nacimiento");
+				contacto.setFechaNacimiento(fechaNacimiento);
+				hayError = false;
+			} catch (Exception e) {
+				pl(e.getMessage());
+			}
+		} while (hayError);
 	}
 
 	private static void borrar() {
 		pl("BORRAR");
-		
+
 		Long id = rLong("ID");
-		
+
 		OFICINA.despedir(id);
-		
+
 		listado();
 	}
 
