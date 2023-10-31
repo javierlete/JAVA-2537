@@ -70,7 +70,7 @@ public class Oficina implements Serializable {
 		return "Oficina [id=" + id + ", nombre=" + nombre + ", director=" + director + ", empleados=" + empleados + "]";
 	}
 
-	public Contacto buscarEmpleadoPorId(Long id) {
+	public Contacto buscarEmpleadoPorId(long id) {
 		for (Contacto e : empleados) {
 			if (e.getId() == id) {
 				return e;
@@ -104,7 +104,7 @@ public class Oficina implements Serializable {
 	public void despedir(Long id) {
 		empleados.remove(buscarEmpleadoPorId(id));
 	}
-	
+
 	public void despedirTodos() {
 		empleados.clear();
 	}
