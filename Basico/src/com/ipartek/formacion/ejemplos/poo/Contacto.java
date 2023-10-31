@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 public class Contacto implements Serializable {
+	public static final String NOMBRE_POR_DEFECTO = "Anónimo";
+
 	private static final long serialVersionUID = -2280086593329524475L;
 
 	// Variables de instancia
@@ -35,7 +37,7 @@ public class Contacto implements Serializable {
 	}
 	
 	public Contacto() {
-		this(null, "Anónimo", null, null);
+		this(null, NOMBRE_POR_DEFECTO, null, null);
 	}
 	
 	// Constructor de copia
