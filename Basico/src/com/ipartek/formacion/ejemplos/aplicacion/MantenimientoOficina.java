@@ -14,17 +14,33 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import com.ipartek.formacion.ejemplos.poo.Contacto;
-import com.ipartek.formacion.ejemplos.poo.Oficina;
 
 public class MantenimientoOficina {
+	private static final String FORMATO = "%2s %-20s %-20s %-10s\n";
+
+	private static final String url = "jdbc:sqlite:sql/contactos.db";
+
+	private static final String SELECT = "SELECT * FROM contactos";
+	private static final String SELECT_ID = "SELECT * FROM contactos WHERE id = ?";
+	private static final String INSERT = "INSERT INTO contactos (nombre, apellidos, fecha_nacimiento) VALUES (?,?,?)";
+	private static final String INSERT_ID = "INSERT INTO contactos (id, nombre, apellidos, fecha_nacimiento) VALUES (?,?,?,?)";
+	private static final String UPDATE = "UPDATE contactos SET nombre = ?, apellidos = ?, fecha_nacimiento = ? WHERE id = ?";
+	private static final String DELETE = "DELETE FROM contactos WHERE id = ?";
+	private static final String TRUNCATE = "DELETE FROM contactos; DELETE FROM SQLITE_SEQUENCE WHERE name='contactos';";
 
 	private static final String FICHERO_CONTACTOS = "contactos.dat";
 	private static final String FICHERO_CONTACTOS_CSV = "contactos.csv";
-	
+
 	private static final int LISTADO = 1;
 	private static final int BUSCAR = 2;
 	private static final int INSERTAR = 3;
@@ -37,8 +53,7 @@ public class MantenimientoOficina {
 
 	private static final int SALIR = 0;
 
-	private static Oficina oficina = new Oficina(null, "Bilbao", new Contacto("Javier"));
-
+//	private static Oficina oficina = new Oficina(null, "Bilbao", new Contacto("Javier"));
 
 //	static {
 //		OFICINA.contratar(new Contacto("Uno"));
@@ -47,12 +62,20 @@ public class MantenimientoOficina {
 //		OFICINA.contratar(new Contacto("Cuatro"));
 //	}
 
+	private static Connection con = null;
+
 	public static void main(String[] args) {
+		try {
+			con = DriverManager.getConnection(url);
+		} catch (SQLException e) {
+			pl("No se ha podido conectar a la base de datos");
+		}
+
 		int opcion;
 
-		cargar();
+//		cargar();
 //		importar();
-		
+
 		do {
 			mostrarMenu();
 			opcion = recibirOpcion();
@@ -124,10 +147,17 @@ public class MantenimientoOficina {
 	private static void listado() {
 		pl("LISTADO DE CONTACTOS");
 
-		for (Contacto c : oficina.getEmpleados()) {
-			// TODO Mejorar formato de visualización
-			pl(c);
+		try (PreparedStatement pst = con.prepareStatement(SELECT); ResultSet rs = pst.executeQuery()) {
+			System.out.printf(FORMATO, "ID", "NOMBRE", "APELLIDOS", "FECHA");
+
+			while (rs.next()) {
+				System.out.printf(FORMATO, rs.getInt("id"), rs.getString("nombre"), rs.getString("apellidos"),
+						rs.getString("fecha_nacimiento"));
+			}
+		} catch (SQLException e) {
+			pl("No se ha podido listar los contactos");
 		}
+
 	}
 
 	private static void buscar() {
@@ -135,14 +165,21 @@ public class MantenimientoOficina {
 
 		Long id = rLong("ID");
 
-		Contacto contacto = oficina.buscarEmpleadoPorId(id);
+		try (PreparedStatement pst = con.prepareStatement(SELECT_ID)) {
+			pst.setLong(1, id);
 
-		if (contacto != null) {
-			pl(contacto);
-
-			// TODO Mejorar la visualización del contacto en formato ficha
-		} else {
-			pl("No se ha encontrado el contacto");
+			try (ResultSet rs = pst.executeQuery()) {
+				if (rs.next()) {
+					System.out.printf(FORMATO, "ID", "NOMBRE", "APELLIDOS", "FECHA");
+					System.out.printf(FORMATO, rs.getInt("id"), rs.getString("nombre"), rs.getString("apellidos"),
+							rs.getString("fecha_nacimiento"));
+				} else {
+					System.out.println("No encontrado");
+				}
+			}
+		} catch (NumberFormatException | SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -150,10 +187,17 @@ public class MantenimientoOficina {
 		pl("INSERTAR");
 
 		Contacto contacto = new Contacto();
-
 		pedirDatosContacto(contacto);
 
-		oficina.contratar(contacto);
+		try (PreparedStatement pst = con.prepareStatement(INSERT)) {
+			pst.setString(1, contacto.getNombre());
+			pst.setString(2, contacto.getApellidos());
+			pst.setString(3, contacto.getFechaNacimiento().toString()); // java.sql.Date.valueOf(LocalDate.now()));
+
+			pst.executeUpdate();
+		} catch (SQLException e) {
+			pl("No se ha podido insertar el contacto");
+		}
 
 		listado();
 	}
@@ -163,15 +207,22 @@ public class MantenimientoOficina {
 
 		Long id = rLong("ID");
 
-		Contacto contacto = oficina.buscarEmpleadoPorId(id);
+		Contacto contacto = new Contacto();
+		pedirDatosContacto(contacto);
 
-		if (contacto != null) {
-			pedirDatosContacto(contacto);
+		try (PreparedStatement pst = con.prepareStatement(UPDATE)) {
+			pst.setString(1, contacto.getNombre());
+			pst.setString(2, contacto.getApellidos());
+			pst.setString(3, contacto.getFechaNacimiento().toString()); // java.sql.Date.valueOf(LocalDate.now()));
 
-			listado();
-		} else {
-			pl("No se ha encontrado el contacto");
+			pst.setLong(4, id);
+
+			pst.executeUpdate();
+		} catch (SQLException e) {
+			pl("No se ha podido modificar el contacto");
 		}
+
+		listado();
 	}
 
 	private static void pedirDatosContacto(Contacto contacto) {
@@ -214,7 +265,13 @@ public class MantenimientoOficina {
 
 		Long id = rLong("ID");
 
-		oficina.despedir(id);
+		try (PreparedStatement pst = con.prepareStatement(DELETE)) {
+			pst.setLong(1, id);
+
+			pst.executeUpdate();
+		} catch (SQLException e) {
+			pl("No se ha podido borrar el contacto");
+		}
 
 		listado();
 	}
@@ -222,75 +279,124 @@ public class MantenimientoOficina {
 	private static void exportar() {
 		pl("EXPORTAR");
 
-		try (FileWriter fw = new FileWriter(FICHERO_CONTACTOS_CSV);
-				PrintWriter pw = new PrintWriter(fw)) {
+		try (FileWriter fw = new FileWriter(FICHERO_CONTACTOS_CSV); PrintWriter pw = new PrintWriter(fw)) {
 			System.out.println("\"ID\";\"Nombre\";\"Apellidos\";\"FechaNacimiento\"");
-			pw.print(
-				"""
-				"ID";"Nombre";"Apellidos";"FechaNacimiento"
-				""");
-			
-			for (Contacto c : oficina.getEmpleados()) {
-				System.out.printf("%s;%s;%s;%s\n", c.getId(), c.getNombre(), c.getApellidos(), c.getFechaNacimiento());
-				pw.printf("%s;%s;%s;%s\n", c.getId(), c.getNombre(), c.getApellidos(), c.getFechaNacimiento());
+			pw.print("""
+					"ID";"Nombre";"Apellidos";"FechaNacimiento"
+					""");
+
+			try (PreparedStatement pst = con.prepareStatement(SELECT); ResultSet rs = pst.executeQuery()) {
+				System.out.printf(FORMATO, "ID", "NOMBRE", "APELLIDOS", "FECHA");
+
+				while (rs.next()) {
+					System.out.printf("%s;%s;%s;%s\n", rs.getInt("id"), rs.getString("nombre"),
+							rs.getString("apellidos"), rs.getString("fecha_nacimiento"));
+					pw.printf("%s;%s;%s;%s\n", rs.getInt("id"), rs.getString("nombre"), rs.getString("apellidos"),
+							rs.getString("fecha_nacimiento"));
+				}
+			} catch (SQLException e) {
+				pl("No se ha podido listar los contactos");
 			}
 		} catch (IOException e) {
 			pl("No se ha podido escribir el fichero");
 		}
-		
+
 		System.out.println("Fichero exportado");
 	}
 
 	private static void importar() {
 		pl("IMPORTAR");
-		
+
 		try (FileReader fr = new FileReader(FICHERO_CONTACTOS_CSV);
-				Scanner sc = new Scanner(fr);) {
-			
-			oficina.despedirTodos();
-			
+				Scanner sc = new Scanner(fr);
+				PreparedStatement pst = con.prepareStatement(TRUNCATE);) {
+
+			pst.executeUpdate();
+
 			sc.nextLine();
-			
+
+			PreparedStatement pstInsert = con.prepareStatement(INSERT_ID);
+
 			while (sc.hasNextLine()) {
 				String linea = sc.nextLine();
 				System.out.println(linea);
-				
+
 				String[] partes = linea.split(";");
-				
+
 				Long id = "null".equals(partes[0]) ? null : Long.parseLong(partes[0]);
 				String nombre = "null".equals(partes[1]) ? null : partes[1].trim();
 				String apellidos = "null".equals(partes[2]) ? null : partes[2].trim();
 				LocalDate fechaNacimiento = "null".equals(partes[3]) ? null : LocalDate.parse(partes[3]);
-				
-				Contacto c = new Contacto(id, nombre, apellidos, fechaNacimiento);
-				
-				oficina.contratar(c);
+
+				pstInsert.setLong(1, id);
+				pstInsert.setString(2, nombre);
+				pstInsert.setString(3, apellidos);
+				pstInsert.setString(4, fechaNacimiento.toString()); // java.sql.Date.valueOf(LocalDate.now()));
+
+				pstInsert.executeUpdate();
 			}
 		} catch (IOException e) {
 			pl("No se ha podido leer el fichero");
+		} catch (NumberFormatException e) {
+			pl("Error de conversión numérica");
+		} catch (SQLException e) {
+			pl("No se ha podido actualizar la base de datos");
+			e.printStackTrace();
 		}
-		
+
 		System.out.println("Fichero importado");
 	}
 
 	private static void guardar() {
 		pl("GUARDAR");
-		
+
 		try (FileOutputStream fos = new FileOutputStream(FICHERO_CONTACTOS);
 				ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-			oos.writeObject(oficina);
+
+			var listado = new ArrayList<Contacto>();
+
+			try (PreparedStatement pst = con.prepareStatement(SELECT); ResultSet rs = pst.executeQuery()) {
+				System.out.printf(FORMATO, "ID", "NOMBRE", "APELLIDOS", "FECHA");
+
+				while (rs.next()) {
+					listado.add(new Contacto(rs.getLong("id"), rs.getString("nombre"), rs.getString("apellidos"),
+							LocalDate.parse(rs.getString("fecha_nacimiento"))));
+				}
+			} catch (SQLException e) {
+				pl("No se ha podido listar los contactos");
+			}
+
+			oos.writeObject(listado);
 		} catch (IOException e) {
 			pl("No se ha podido escribir el fichero");
 			e.printStackTrace();
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private static void cargar() {
 		pl("CARGAR");
-		
+
 		try (FileInputStream fis = new FileInputStream(FICHERO_CONTACTOS);
 				ObjectInputStream ois = new ObjectInputStream(fis)) {
-			oficina = (Oficina) ois.readObject();
+			var listado = (ArrayList<Contacto>) ois.readObject();
+
+			try (PreparedStatement pst = con.prepareStatement(TRUNCATE)) {
+				pst.executeUpdate();
+
+				PreparedStatement pstInsert = con.prepareStatement(INSERT_ID);
+
+				for (Contacto c : listado) {
+					pstInsert.setLong(1, c.getId());
+					pstInsert.setString(2, c.getNombre());
+					pstInsert.setString(3, c.getApellidos());
+					pstInsert.setString(4, c.getFechaNacimiento().toString()); // java.sql.Date.valueOf(LocalDate.now()));
+
+					pstInsert.executeUpdate();
+				}
+			} catch (SQLException e) {
+				pl("No se ha podido actualizar la base de datos");
+			}
 		} catch (IOException | ClassNotFoundException e) {
 			pl("No se ha podido leer el fichero");
 		}
@@ -298,7 +404,7 @@ public class MantenimientoOficina {
 
 	private static void salir() {
 //		exportar();
-		guardar();
+//		guardar();
 
 		pl("SALIENDO");
 	}
