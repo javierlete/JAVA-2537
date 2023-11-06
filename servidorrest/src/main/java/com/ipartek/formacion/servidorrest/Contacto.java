@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import jakarta.json.bind.annotation.JsonbTransient;
+
 public class Contacto implements Serializable {
 	public static final String NOMBRE_POR_DEFECTO = "Anónimo";
 
@@ -115,6 +117,7 @@ public class Contacto implements Serializable {
 				+ fechaNacimiento + "]";
 	}
 	
+	@JsonbTransient
 	public String getNombreCompleto() {
 		return nombre + " " + apellidos;
 	}
