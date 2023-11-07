@@ -1,11 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"
 	import="java.time.LocalDate, java.util.TreeMap, com.ipartek.formacion.Contacto, java.sql.*"%>
-<%!private final static TreeMap<Long, Contacto> contactos = new TreeMap<>();
-
+<%!
 	private final static String URL = "jdbc:sqlite:/sqlite/contactos.db";
-
-	private static Long contador = 3L;
 
 	static {
 		try {
@@ -15,7 +12,52 @@
 		}
 	}%>
 <%
+String editar = request.getParameter("editar");
+String borrar = request.getParameter("borrar");
+
+String nombre = request.getParameter("nombre");
+String apellidos = request.getParameter("apellidos");
+String fecha = request.getParameter("fecha");
+
+TreeMap<Long, Contacto> contactos = new TreeMap<>();
+
 Connection con = DriverManager.getConnection(URL);
+
+if (borrar != null) {
+	Long id = Long.parseLong(borrar);
+	
+	PreparedStatement pstDelete = con.prepareStatement("DELETE FROM contactos WHERE id = ?");
+	pstDelete.setLong(1, id);
+	
+	pstDelete.executeUpdate();
+}
+
+if (nombre != null && apellidos != null && fecha != null) {
+	Contacto guardar = new Contacto(nombre, apellidos, LocalDate.parse(fecha));
+
+	Long id = null;
+
+	String sId = request.getParameter("id");
+
+	PreparedStatement pstGuardar = null;
+	
+	if (sId != null && sId.trim().length() > 0) {
+		id = Long.parseLong(sId);
+		guardar.setId(id);
+	
+		pstGuardar = con.prepareStatement("UPDATE contactos SET nombre=?, apellidos=?, fecha_nacimiento=? WHERE id=?");
+		pstGuardar.setLong(4, id);
+	} else {
+		pstGuardar = con.prepareStatement("INSERT INTO contactos (nombre, apellidos, fecha_nacimiento) VALUES (?,?,?)");
+	}
+
+	pstGuardar.setString(1, guardar.getNombre());
+	pstGuardar.setString(2, guardar.getApellidos());
+	pstGuardar.setString(3, guardar.getFechaNacimiento().toString());
+	
+	pstGuardar.executeUpdate();
+}
+
 PreparedStatement pst = con.prepareStatement("SELECT * FROM contactos");
 ResultSet rs = pst.executeQuery();
 
@@ -27,40 +69,11 @@ while (rs.next()) {
 	contactos.put(id, contacto);
 }
 
-String editar = request.getParameter("editar");
-String borrar = request.getParameter("borrar");
-
-String nombre = request.getParameter("nombre");
-String apellidos = request.getParameter("apellidos");
-String fecha = request.getParameter("fecha");
-
-if (nombre != null && apellidos != null && fecha != null) {
-	Contacto guardar = new Contacto(contador, nombre, apellidos, LocalDate.parse(fecha));
-
-	Long id = null;
-
-	String sId = request.getParameter("id");
-
-	if (sId != null && sId.trim().length() > 0) {
-		id = Long.parseLong(sId);
-	} else {
-		id = contador++;
-	}
-
-	guardar.setId(id);
-	contactos.put(id, guardar);
-}
-
 Contacto contacto = new Contacto();
 
 if (editar != null) {
 	Long id = Long.parseLong(editar);
 	contacto = contactos.get(id);
-}
-
-if (borrar != null) {
-	Long id = Long.parseLong(borrar);
-	contactos.remove(id);
 }
 %>
 <!DOCTYPE html>
