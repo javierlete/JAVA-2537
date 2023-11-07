@@ -61,8 +61,8 @@ public class Contacto implements Serializable {
 		return nombre;
 	}
 	public void setNombre(String nombre) {
-		if(nombre == null || nombre.trim().length() == 0) {
-			throw new RuntimeException("El nombre es obligatorio debe tener al menos un caracter");
+		if(nombre == null || nombre.trim().matches("^[\\p{L}' ]{1,50}$")) {
+			throw new RuntimeException("El nombre es obligatorio debe tener al menos un caracter y no utilizar caracteres extraños");
 		}
 		
 		this.nombre = nombre.trim();
@@ -71,7 +71,7 @@ public class Contacto implements Serializable {
 		return apellidos;
 	}
 	public void setApellidos(String apellidos) {
-		if(apellidos != null && apellidos.trim().length() == 0) {
+		if(apellidos != null && apellidos.trim().matches("^[\\p{L}' ]{0,100}$")) {
 			throw new RuntimeException("Los apellidos deben tener al menos un caracter");
 		}
 		
