@@ -1,15 +1,32 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"
-	import="java.time.LocalDate, java.util.TreeMap, com.ipartek.formacion.Contacto"%>
+	import="java.time.LocalDate, java.util.TreeMap, com.ipartek.formacion.Contacto, java.sql.*"%>
 <%!private final static TreeMap<Long, Contacto> contactos = new TreeMap<>();
+
+	private final static String URL = "jdbc:sqlite:/sqlite/contactos.db";
 
 	private static Long contador = 3L;
 
 	static {
-		contactos.put(1L, new Contacto(1L, "Uno", "Unez", LocalDate.now()));
-		contactos.put(2L, new Contacto(2L, "Dos", "Dosez", LocalDate.now()));
+		try {
+			Class.forName("org.sqlite.JDBC");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 	}%>
 <%
+Connection con = DriverManager.getConnection(URL);
+PreparedStatement pst = con.prepareStatement("SELECT * FROM contactos");
+ResultSet rs = pst.executeQuery();
+
+while (rs.next()) {
+	Long id = rs.getLong("id");
+	Contacto contacto = new Contacto(rs.getLong("id"), rs.getString("nombre"), rs.getString("apellidos"),
+	LocalDate.parse(rs.getString("fecha_nacimiento")));
+
+	contactos.put(id, contacto);
+}
+
 String editar = request.getParameter("editar");
 String borrar = request.getParameter("borrar");
 
