@@ -2,49 +2,34 @@
 	pageEncoding="UTF-8"%>
 <%@ include file="includes/cabecera.jsp"%>
 
-<div class="row row-cols-1 row-cols-md-3 g-4">
-	<div class="col">
-		<div class="card h-100">
-			<img src="..." class="card-img-top" alt="...">
-			<div class="card-body">
-				<h5 class="card-title">Card title</h5>
-				<p class="card-text">This is a wider card with supporting text
-					below as a natural lead-in to additional content. This content is a
-					little bit longer.</p>
-			</div>
-			<div class="card-footer">
-				<small class="text-body-secondary">Last updated 3 mins ago</small>
-			</div>
-		</div>
-	</div>
-	<div class="col">
-		<div class="card h-100">
-			<img src="..." class="card-img-top" alt="...">
-			<div class="card-body">
-				<h5 class="card-title">Card title</h5>
-				<p class="card-text">This card has supporting text below as a
-					natural lead-in to additional content.</p>
-			</div>
-			<div class="card-footer">
-				<small class="text-body-secondary">Last updated 3 mins ago</small>
+<%
+var contactos = obtenerContactos();
+%>
+
+<div class="container">
+
+	<div
+		class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 row-cols-xxl-6 g-4">
+		<%
+		for (Contacto c : contactos.values()) {
+		%>
+		<div class="col">
+			<div class="card h-100">
+				<img src="https://picsum.photos/300/200?<%=c.getId()%>" class="card-img-top" alt="...">
+				<div class="card-body">
+					<h5 class="card-title"><%=c.getNombre()%>
+						<%=c.getApellidos() != null ? c.getApellidos() : ""%></h5>
+				</div>
+				<div class="card-footer">
+					<small class="text-body-secondary"><%=c.getFechaNacimiento() != null ? c.getFechaNacimiento() : ""%></small>
+				</div>
 			</div>
 		</div>
+		<%
+		}
+		%>
 	</div>
-	<div class="col">
-		<div class="card h-100">
-			<img src="..." class="card-img-top" alt="...">
-			<div class="card-body">
-				<h5 class="card-title">Card title</h5>
-				<p class="card-text">This is a wider card with supporting text
-					below as a natural lead-in to additional content. This card has
-					even longer content than the first to show that equal height
-					action.</p>
-			</div>
-			<div class="card-footer">
-				<small class="text-body-secondary">Last updated 3 mins ago</small>
-			</div>
-		</div>
-	</div>
+
 </div>
 
 <%@ include file="includes/pie.jsp"%>
