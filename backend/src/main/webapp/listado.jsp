@@ -2,15 +2,7 @@
 	pageEncoding="UTF-8"
 	import="java.time.LocalDate, java.util.TreeMap, com.ipartek.formacion.Contacto, java.sql.*"%>
 <%@ include file="includes/cabecera.jsp" %>
-<%!private final static String URL = "jdbc:sqlite:/sqlite/contactos.db";
 
-	static {
-		try {
-			Class.forName("org.sqlite.JDBC");
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-	}%>
 <%
 String editar = request.getParameter("editar");
 String borrar = request.getParameter("borrar");
@@ -18,10 +10,6 @@ String borrar = request.getParameter("borrar");
 String nombre = request.getParameter("nombre");
 String apellidos = request.getParameter("apellidos");
 String fecha = request.getParameter("fecha");
-
-TreeMap<Long, Contacto> contactos = new TreeMap<>();
-
-Connection con = DriverManager.getConnection(URL);
 
 if (borrar != null) {
 	Long id = Long.parseLong(borrar);
@@ -76,25 +64,7 @@ if (nombre != null && apellidos != null && fecha != null) {
 	pstGuardar.close();
 }
 
-PreparedStatement pst = con.prepareStatement("SELECT * FROM contactos");
-ResultSet rs = pst.executeQuery();
-
-while (rs.next()) {
-	Long id = rs.getLong("id");
-	LocalDate fechaNacimiento = null;
-
-	if (rs.getString("fecha_nacimiento") != null) {
-		fechaNacimiento = LocalDate.parse(rs.getString("fecha_nacimiento"));
-	}
-
-	Contacto contacto = new Contacto(rs.getLong("id"), rs.getString("nombre"), rs.getString("apellidos"),
-	fechaNacimiento);
-
-	contactos.put(id, contacto);
-}
-
-rs.close();
-pst.close();
+TreeMap<Long, Contacto> contactos = obtenerContactos();
 
 Contacto contacto = new Contacto();
 
@@ -103,7 +73,6 @@ if (editar != null) {
 	contacto = contactos.get(id);
 }
 
-con.close();
 %>
 	<div class="table-responsive">
 		<table class="table table-hover table-striped table-bordered">
