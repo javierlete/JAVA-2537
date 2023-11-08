@@ -1,0 +1,4 @@
+Para que la base de datos la detecte la aplicación tiene que estar 
+en:
+
+C:\sqlite\contactos.db
