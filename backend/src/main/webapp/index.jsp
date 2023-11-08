@@ -15,7 +15,7 @@ var contactos = obtenerContactos();
 		%>
 		<div class="col">
 			<div class="card h-100">
-				<img src="https://picsum.photos/300/200?<%=c.getId()%>" class="card-img-top" alt="...">
+				<img src="imgs/<%=c.getId()%>.jpg" class="card-img-top" alt="...">
 				<div class="card-body">
 					<h5 class="card-title"><%=c.getNombre()%>
 						<%=c.getApellidos() != null ? c.getApellidos() : ""%></h5>
